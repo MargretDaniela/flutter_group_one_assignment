@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ProductService {
@@ -21,20 +22,20 @@ class ProductService {
 
         // Print total count from meta.total
         final int totalProducts = json['meta']['total'];
-        print('Total products: $totalProducts');
+        debugPrint('Total products: $totalProducts');
 
         // Print each product name and formatted_price
         final List products = json['data'];
         for (var product in products) {
-          print('${product['name']} - ${product['formatted_price']}');
+          debugPrint('${product['name']} - ${product['formatted_price']}');
         }
       } else {
         throw HttpException('Server error: ${response.statusCode}');
       }
     } on SocketException {
-      print('No internet connection');
+      debugPrint('No internet connection');
     } on TimeoutException {
-      print('Request timed out — try again');
+      debugPrint('Request timed out — try again');
     }
   }
 }

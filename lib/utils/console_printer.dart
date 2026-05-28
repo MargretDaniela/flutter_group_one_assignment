@@ -6,6 +6,7 @@
 // it easy to change how we display things in one place.
 // ============================================================
 
+import 'package:flutter/foundation.dart';
 import '../models/products_response.dart';
 
 class ConsolePrinter {
@@ -18,18 +19,18 @@ class ConsolePrinter {
   // ---------------------------------------------------------------
   static void printProducts(ProductsResponse response) {
     // Print a header so the console output looks organised
-    print('');
-    print('╔══════════════════════════════════════════╗');
-    print('║         NUTRIBLEND PRODUCTS API          ║');
-    print('╚══════════════════════════════════════════╝');
-    print('');
+    debugPrint('');
+    debugPrint('╔══════════════════════════════════════════╗');
+    debugPrint('║         NUTRIBLEND PRODUCTS API          ║');
+    debugPrint('╚══════════════════════════════════════════╝');
+    debugPrint('');
 
     // ---------------------------------------------------------------
     // Print the total count from meta.total
     // This answers: "how many products exist in the database?"
     // ---------------------------------------------------------------
-    print('📦 Total products available: ${response.total}');
-    print('─' * 44); // prints a divider line
+    debugPrint('📦 Total products available: ${response.total}');
+    debugPrint('─' * 44); // prints a divider line
 
     // ---------------------------------------------------------------
     // Loop through each product and print its name + formatted_price
@@ -45,14 +46,14 @@ class ConsolePrinter {
       final index = entry.key + 1;        // +1 so we start at 1, not 0
       final product = entry.value;
 
-      print('$index. ${product.name}');
-      print('   💰 Price: ${product.formattedPrice}');
-      print('');
+      debugPrint('$index. ${product.name}');
+      debugPrint('   💰 Price: ${product.formattedPrice}');
+      debugPrint('');
     }
 
-    print('─' * 44);
-    print('✅ Done! Printed ${response.data.length} products.');
-    print('');
+    debugPrint('─' * 44);
+    debugPrint('✅ Done! Printed ${response.data.length} products.');
+    debugPrint('');
   }
 
   // ---------------------------------------------------------------
@@ -61,14 +62,14 @@ class ConsolePrinter {
   // Called when something goes wrong — prints a clear error message
   // ---------------------------------------------------------------
   static void printError(Object error) {
-    print('');
-    print('❌ ERROR: Something went wrong!');
-    print('   Details: $error');
-    print('');
-    print('   Possible reasons:');
-    print('   • No internet connection');
-    print('   • The API server is down');
-    print('   • Wrong URL');
-    print('');
+    debugPrint('');
+    debugPrint('❌ ERROR: Something went wrong!');
+    debugPrint('   Details: $error');
+    debugPrint('');
+    debugPrint('   Possible reasons:');
+    debugPrint('   • No internet connection');
+    debugPrint('   • The API server is down');
+    debugPrint('   • Wrong URL');
+    debugPrint('');
   }
 }
