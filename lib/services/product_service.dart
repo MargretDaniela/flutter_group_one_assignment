@@ -1,7 +1,6 @@
 import 'dart:async'; // Required for TimeoutException
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 

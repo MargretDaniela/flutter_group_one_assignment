@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 import '../services/product_service.dart';
 import 'product_detail_screen.dart';
+import 'cart_screen.dart';
+import 'wishlist_screen.dart';
 
 const _primary = Color(0xFF2E7D32);   // Deep Forest Green
 const _bg = Color(0xFFF1F8E9);        // Pale Green Background
@@ -26,9 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   
   int? _selectedCategoryId; 
   List _uniqueCategories = []; 
-  
-  int _cartCount = 0;
-  int _wishlistCount = 0;
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _uniqueCategories = categories;
       });
     } catch (e) {
-      print("Error loading categories: $e");
+      debugPrint("Error loading categories: $e");
     }
   }
 
@@ -135,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader() {
+    final appProvider = Provider.of<AppProvider>(context);
     return SliverAppBar(
       pinned: true,
       backgroundColor: _primary,
@@ -143,21 +145,25 @@ class _HomeScreenState extends State<HomeScreen> {
       actions: [
         IconButton(
           icon: Badge(
-            isLabelVisible: _wishlistCount > 0,
-            label: Text('$_wishlistCount', style: const TextStyle(color: Colors.white)),
+            isLabelVisible: appProvider.wishlistCount > 0,
+            label: Text('${appProvider.wishlistCount}', style: const TextStyle(color: Colors.white)),
             backgroundColor: Colors.orange.shade700,
             child: const Icon(Icons.favorite_border, color: Colors.white),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen()));
+          },
         ),
         IconButton(
           icon: Badge(
-            isLabelVisible: _cartCount > 0,
-            label: Text('$_cartCount', style: const TextStyle(color: Colors.white)),
+            isLabelVisible: appProvider.cartCount > 0,
+            label: Text('${appProvider.cartCount}', style: const TextStyle(color: Colors.white)),
             backgroundColor: Colors.orange.shade700,
             child: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const CartScreen()));
+          },
         ),
         IconButton(
           icon: const Icon(Icons.refresh_rounded, color: Colors.white),
@@ -249,15 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
           childAspectRatio: 0.68,
         ),
         delegate: SliverChildBuilderDelegate(
-          (context, i) => _ProductCard(
-            product: _products[i],
-            onAddToCart: () {
-              setState(() => _cartCount++);
-            },
-            onToggleWishlist: (isFav) {
-              setState(() => _wishlistCount += isFav ? 1 : -1);
-            },
-          ),
+          (context, i) => _ProductCard(product: _products[i]),
           childCount: _products.length,
         ),
       ),
@@ -332,30 +330,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _ProductCard extends StatefulWidget {
+class _ProductCard extends StatelessWidget {
   final Map product;
-  final VoidCallback onAddToCart;
-  final ValueChanged<bool> onToggleWishlist;
-
-  const _ProductCard({
-    required this.product,
-    required this.onAddToCart,
-    required this.onToggleWishlist,
-  });
-
-  @override
-  State<_ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<_ProductCard> {
-  bool _isFavorite = false;
+  const _ProductCard({required this.product});
 
   @override
   Widget build(BuildContext context) {
-    final String image = widget.product['main_image'] ?? '';
-    final String name = widget.product['name']?.toString().trim() ?? 'Product';
-    final String price = widget.product['formatted_price'] ?? '';
-    final bool inStock = widget.product['in_stock'] ?? true;
+    final appProvider = Provider.of<AppProvider>(context);
+    final String image = product['main_image'] ?? '';
+    final String name = product['name']?.toString().trim() ?? 'Product';
+    final String price = product['formatted_price'] ?? '';
+    final bool inStock = product['in_stock'] ?? true;
+    final int id = product['id'] ?? 0;
+    final bool isFavorite = appProvider.isFavorite(id);
 
     return Card(
       elevation: 4,
@@ -371,7 +358,7 @@ class _ProductCardState extends State<_ProductCard> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: widget.product)),
+                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: product)),
                     );
                   },
                   child: Container(
@@ -398,14 +385,11 @@ class _ProductCardState extends State<_ProductCard> {
                   right: 8,
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _isFavorite = !_isFavorite;
-                      });
-                      widget.onToggleWishlist(_isFavorite);
+                      appProvider.toggleWishlist(product);
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(_isFavorite ? 'Added to Wishlist' : 'Removed from Wishlist'),
+                          content: Text(!isFavorite ? 'Added to Wishlist' : 'Removed from Wishlist'),
                           backgroundColor: _primary,
                           duration: const Duration(seconds: 1),
                         ),
@@ -425,8 +409,8 @@ class _ProductCardState extends State<_ProductCard> {
                         ],
                       ),
                       child: Icon(
-                        _isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: _isFavorite ? _primary : Colors.grey,
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? _primary : Colors.grey,
                         size: 20,
                       ),
                     ),
@@ -447,7 +431,7 @@ class _ProductCardState extends State<_ProductCard> {
                   onTap: () {
                      Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: widget.product)),
+                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: product)),
                     );
                   },
                   child: Text(
@@ -490,7 +474,7 @@ class _ProductCardState extends State<_ProductCard> {
                         borderRadius: BorderRadius.circular(20),
                         child: InkWell(
                           onTap: inStock ? () {
-                            widget.onAddToCart();
+                            appProvider.addToCart(product);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Added to Cart!'),

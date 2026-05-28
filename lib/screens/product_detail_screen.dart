@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 
 const _primary = Color(0xFF2E7D32);
 
@@ -9,12 +11,15 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
     final String image = product['main_image'] ?? '';
     final String name = product['name'] ?? 'No Name';
     final String price = product['formatted_price'] ?? '';
     final String desc = product['short_description'] ?? 'No description available.';
     final String cat = product['category']?['name'] ?? 'General';
     final bool inStock = product['in_stock'] ?? true;
+    final int id = product['id'] ?? 0;
+    final bool isFavorite = appProvider.isFavorite(id);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -22,6 +27,22 @@ class ProductDetailScreen extends StatelessWidget {
         backgroundColor: _primary,
         title: const Text('Product Details', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.orange.shade700 : Colors.white),
+            onPressed: () {
+              appProvider.toggleWishlist(product);
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(!isFavorite ? 'Added to Wishlist' : 'Removed from Wishlist'),
+                  backgroundColor: _primary,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -73,14 +94,15 @@ class ProductDetailScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: inStock ? () {
+                        appProvider.addToCart(product);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Added to Cart successfully!', style: TextStyle(color: Colors.white)), 
                             backgroundColor: _primary,
                           ),
                         );
-                      },
+                      } : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primary, 
                         foregroundColor: Colors.white,
