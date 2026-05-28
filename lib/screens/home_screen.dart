@@ -303,16 +303,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _ProductCard extends StatelessWidget {
+class _ProductCard extends StatefulWidget {
   final Map product;
   const _ProductCard({required this.product});
 
   @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
+  bool _isFavorite = false;
+
+  @override
   Widget build(BuildContext context) {
-    final String image = product['main_image'] ?? '';
-    final String name = product['name']?.toString().trim() ?? 'Product';
-    final String price = product['formatted_price'] ?? '';
-    final bool inStock = product['in_stock'] ?? true;
+    final String image = widget.product['main_image'] ?? '';
+    final String name = widget.product['name']?.toString().trim() ?? 'Product';
+    final String price = widget.product['formatted_price'] ?? '';
+    final bool inStock = widget.product['in_stock'] ?? true;
 
     return Card(
       elevation: 4,
@@ -328,7 +335,7 @@ class _ProductCard extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: product)),
+                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: widget.product)),
                     );
                   },
                   child: Container(
@@ -348,7 +355,46 @@ class _ProductCard extends StatelessWidget {
                       alignment: Alignment.center,
                       child: const Text('OUT OF STOCK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
                     ),
-                  )
+                  ),
+                // WISHLIST BUTTON
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isFavorite = !_isFavorite;
+                      });
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(_isFavorite ? 'Added to Wishlist' : 'Removed from Wishlist'),
+                          backgroundColor: _primary,
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: Icon(
+                        _isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: _isFavorite ? _primary : Colors.grey,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -364,7 +410,7 @@ class _ProductCard extends StatelessWidget {
                   onTap: () {
                      Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: product)),
+                      MaterialPageRoute(builder: (context) => ProductDetailScreen(product: widget.product)),
                     );
                   },
                   child: Text(
