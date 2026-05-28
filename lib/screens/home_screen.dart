@@ -26,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   
   int? _selectedCategoryId; 
   List _uniqueCategories = []; 
+  
+  int _cartCount = 0;
+  int _wishlistCount = 0;
 
   @override
   void initState() {
@@ -139,6 +142,24 @@ class _HomeScreenState extends State<HomeScreen> {
       centerTitle: false,
       actions: [
         IconButton(
+          icon: Badge(
+            isLabelVisible: _wishlistCount > 0,
+            label: Text('$_wishlistCount', style: const TextStyle(color: Colors.white)),
+            backgroundColor: Colors.orange.shade700,
+            child: const Icon(Icons.favorite_border, color: Colors.white),
+          ),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: Badge(
+            isLabelVisible: _cartCount > 0,
+            label: Text('$_cartCount', style: const TextStyle(color: Colors.white)),
+            backgroundColor: Colors.orange.shade700,
+            child: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+          ),
+          onPressed: () {},
+        ),
+        IconButton(
           icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           onPressed: () {
             _loadPage(_currentPage);
@@ -228,7 +249,15 @@ class _HomeScreenState extends State<HomeScreen> {
           childAspectRatio: 0.68,
         ),
         delegate: SliverChildBuilderDelegate(
-          (context, i) => _ProductCard(product: _products[i]),
+          (context, i) => _ProductCard(
+            product: _products[i],
+            onAddToCart: () {
+              setState(() => _cartCount++);
+            },
+            onToggleWishlist: (isFav) {
+              setState(() => _wishlistCount += isFav ? 1 : -1);
+            },
+          ),
           childCount: _products.length,
         ),
       ),
@@ -305,7 +334,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _ProductCard extends StatefulWidget {
   final Map product;
-  const _ProductCard({required this.product});
+  final VoidCallback onAddToCart;
+  final ValueChanged<bool> onToggleWishlist;
+
+  const _ProductCard({
+    required this.product,
+    required this.onAddToCart,
+    required this.onToggleWishlist,
+  });
 
   @override
   State<_ProductCard> createState() => _ProductCardState();
@@ -365,6 +401,7 @@ class _ProductCardState extends State<_ProductCard> {
                       setState(() {
                         _isFavorite = !_isFavorite;
                       });
+                      widget.onToggleWishlist(_isFavorite);
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -453,6 +490,7 @@ class _ProductCardState extends State<_ProductCard> {
                         borderRadius: BorderRadius.circular(20),
                         child: InkWell(
                           onTap: inStock ? () {
+                            widget.onAddToCart();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Added to Cart!'),
