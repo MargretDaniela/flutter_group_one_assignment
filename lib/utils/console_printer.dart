@@ -6,6 +6,8 @@
 // it easy to change how we display things in one place.
 // ============================================================
 
+// ignore_for_file: avoid_print
+
 import '../models/products_response.dart';
 
 class ConsolePrinter {
