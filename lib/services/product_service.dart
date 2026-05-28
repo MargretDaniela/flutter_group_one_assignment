@@ -21,7 +21,7 @@ class ProductService {
     try {
       const String targetUrl = 'https://admin.rasmuspharmaceuticals.com/api/v1/products';
       // Use a CORS proxy if running on the Web
-      final String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
+      const String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
 
       final response = await http
           .get(Uri.parse(proxyUrl))
@@ -59,8 +59,17 @@ class ProductService {
   //   'total'     → int, total product count
   //   'lastPage'  → int, the final page number (from meta.last_page)
   
-  static Future<Map<String, dynamic>> fetchProducts({int page = 1}) async {
-    final String targetUrl = '$_baseUrl?page=$page';
+  static Future<Map<String, dynamic>> fetchProducts({
+    int page = 1,
+    int? perPage,
+    String? search,
+    int? categoryId,
+  }) async {
+    String targetUrl = '$_baseUrl?page=$page';
+    if (perPage != null) targetUrl += '&per_page=$perPage';
+    if (search != null && search.isNotEmpty) targetUrl += '&search=$search';
+    if (categoryId != null) targetUrl += '&category_id=$categoryId';
+    
     final String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
 
     final response = await http
