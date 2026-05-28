@@ -1,22 +1,22 @@
-// EXERCISE 3 UPDATE: fetchProducts() now also returns
-// last_page from meta so the UI knows when to stop paginating
-
-
-// ignore_for_file: avoid_print
-
+import 'dart:async'; // Required for TimeoutException
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+// ignore_for_file: avoid_print
+// We use ignore_for_file because Week 5 Exercise 1 specifically asks 
+// us to print to the console.
+
 class ProductService {
   static const String _baseUrl =
       'https://admin.rasmuspharmaceuticals.com/api/v1/products';
 
-  
-  // EXERCISE 1 — kept as-is (prints to console)
-  
+  // ---------------------------------------------------------------
+  // EXERCISE 1: Console Printer
+  // ---------------------------------------------------------------
+  // Fetches data and prints the result to the debug console.
   static Future<void> fetchProductsSafely() async {
     try {
       const String targetUrl = 'https://admin.rasmuspharmaceuticals.com/api/v1/products';
@@ -46,6 +46,11 @@ class ProductService {
     }
   }
 
+  // ---------------------------------------------------------------
+  // EXERCISE 2 & 3: Fetch for UI
+  // ---------------------------------------------------------------
+  // Returns a Map with 'products', 'total', and 'lastPage'.
+  // Supports search, category filtering, and custom page size.
   
   // EXERCISE 2 & 3 — returns data so the UI can display it
   
@@ -68,7 +73,7 @@ class ProductService {
       return {
         'products': body['data'] as List,
         'total': body['meta']['total'] as int,
-        'lastPage': body['meta']['last_page'] as int, // ← NEW for Exercise 3
+        'lastPage': body['meta']['last_page'] as int,
       };
     } else {
       throw HttpException('Server error: ${response.statusCode}');
