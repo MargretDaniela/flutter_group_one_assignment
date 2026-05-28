@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ProductService {
@@ -18,26 +19,30 @@ class ProductService {
   
   static Future<void> fetchProductsSafely() async {
     try {
+      const String targetUrl = 'https://admin.rasmuspharmaceuticals.com/api/v1/products';
+      // Use a CORS proxy if running on the Web
+      final String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
+
       final response = await http
-          .get(Uri.parse(_baseUrl))
+          .get(Uri.parse(proxyUrl))
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> json = jsonDecode(response.body);
         final int totalProducts = json['meta']['total'];
-        print('Total products: $totalProducts');
+        debugPrint('Total products: $totalProducts');
 
         final List products = json['data'];
         for (var product in products) {
-          print('${product['name']} - ${product['formatted_price']}');
+          debugPrint('${product['name']} - ${product['formatted_price']}');
         }
       } else {
         throw HttpException('Server error: ${response.statusCode}');
       }
     } on SocketException {
-      print('No internet connection');
+      debugPrint('No internet connection');
     } on TimeoutException {
-      print('Request timed out — try again');
+      debugPrint('Request timed out — try again');
     }
   }
 
@@ -50,8 +55,11 @@ class ProductService {
   //   'lastPage'  → int, the final page number (from meta.last_page)
   
   static Future<Map<String, dynamic>> fetchProducts({int page = 1}) async {
+    final String targetUrl = '$_baseUrl?page=$page';
+    final String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
+
     final response = await http
-        .get(Uri.parse('$_baseUrl?page=$page'))
+        .get(Uri.parse(proxyUrl))
         .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 200) {
