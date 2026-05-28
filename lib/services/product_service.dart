@@ -11,10 +11,12 @@ import 'package:http/http.dart' as http;
 class ProductService {
   static Future<void> fetchProductsSafely() async {
     try {
+      final String targetUrl = 'https://admin.rasmuspharmaceuticals.com/api/v1/products';
+      // Use a CORS proxy if running on the Web
+      final String proxyUrl = kIsWeb ? 'https://corsproxy.io/?$targetUrl' : targetUrl;
+
       final response = await http
-          .get(Uri.parse(
-            'https://admin.rasmuspharmaceuticals.com/api/v1/products',
-          ))
+          .get(Uri.parse(proxyUrl))
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
