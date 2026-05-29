@@ -6,10 +6,12 @@ import '../providers/app_provider.dart';
 import '../services/product_service.dart';
 import 'product_detail_screen.dart';
 
-const _primary = Color(0xFF2E7D32);
-const _bg = Color(0xFFF5F5F0);
-const _textDark = Color(0xFF1B5E20);
-const _textLight = Color(0xFF9E9E9E);
+// Color scheme for consistent branding
+const _primary = Color(0xFF2E7D32);   // Green primary
+const _primaryDark = Color(0xFF004D40); // Dark green
+const _bg = Color(0xFFF1F8E9);        // Light green background
+const _textDark = Color(0xFF1B5E20);   // Dark green text
+const _textLight = Color(0xFF616161); // Grey text
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -109,31 +111,86 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 4),
               ],
             ),
-          ),
-          if (_isLoading && _products.isEmpty)
-            const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator(color: _primary)))
-          else if (_error != null)
-            SliverFillRemaining(
-                child: _ErrorView(message: _error!, onRetry: () => _loadPage(_currentPage)))
-          else if (_products.isEmpty)
-            const SliverFillRemaining(
-                child: Center(child: Text('No products found',
-                    style: TextStyle(color: _textLight, fontSize: 15))))
-          else ...[
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.68,
+            Row(
+              children: [
+                // Wishlist icon with badge
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WishlistScreen()),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Badge(
+                      isLabelVisible: appProvider.wishlistCount > 0,
+                      label: Text('${appProvider.wishlistCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                      backgroundColor: _primary,
+                      smallSize: 16,
+                      child: const Icon(Icons.favorite_border, color: _primary, size: 22),
+                    ),
+                  ),
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (_, i) => _ProductCard(product: _products[i]),
-                  childCount: _products.length,
+                // Cart icon with badge
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartScreen()),
+                    );
+                  },
+                  child: Badge(
+                    isLabelVisible: appProvider.cartCount > 0,
+                    label: Text('${appProvider.cartCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                    backgroundColor: _primary,
+                    smallSize: 16,
+                    child: const Icon(Icons.shopping_cart_outlined, color: _primary, size: 22),
+                  ),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded, color: _primary),
+          onPressed: () {
+            _loadPage(_currentPage);
+            _loadAllCategories();
+          },
+          tooltip: 'Refresh',
+        )
+      ],
+    );
+  }
+
+  // Welcome section
+  Widget _buildWelcomeSection() {
+    return SliverToBoxAdapter(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Welcome to NutriBlend',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                color: _textDark,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Discover the finest supplements to fuel your performance',
+              style: TextStyle(
+                fontSize: 16,
+                color: _textLight,
+                height: 1.5,
               ),
             ),
             SliverToBoxAdapter(child: _pagination()),
