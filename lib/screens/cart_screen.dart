@@ -130,7 +130,10 @@ class CartScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              final appProvider = Provider.of<AppProvider>(context, listen: false);
+              appProvider.changeIndex(0);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: _primary,
               foregroundColor: Colors.white,
