@@ -17,7 +17,6 @@ const _primaryDark = Color(0xFF004D40); // Dark green
 const _bg = Color(0xFFF1F8E9);        // Light green background
 const _textDark = Color(0xFF1B5E20);   // Dark green text
 const _textLight = Color(0xFF616161); // Grey text
-const _accent = Color(0xFF4CAF50);    // Light green accent
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -202,23 +201,39 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               children: [
                 // Wishlist icon with badge
-                Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  child: Badge(
-                    isLabelVisible: appProvider.wishlistCount > 0,
-                    label: Text('${appProvider.wishlistCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
-                    backgroundColor: _primary,
-                    smallSize: 16,
-                    child: const Icon(Icons.favorite_border, color: _primary, size: 22),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WishlistScreen()),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Badge(
+                      isLabelVisible: appProvider.wishlistCount > 0,
+                      label: Text('${appProvider.wishlistCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                      backgroundColor: _primary,
+                      smallSize: 16,
+                      child: const Icon(Icons.favorite_border, color: _primary, size: 22),
+                    ),
                   ),
                 ),
                 // Cart icon with badge
-                Badge(
-                  isLabelVisible: appProvider.cartCount > 0,
-                  label: Text('${appProvider.cartCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
-                  backgroundColor: _primary,
-                  smallSize: 16,
-                  child: const Icon(Icons.shopping_cart_outlined, color: _primary, size: 22),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartScreen()),
+                    );
+                  },
+                  child: Badge(
+                    isLabelVisible: appProvider.cartCount > 0,
+                    label: Text('${appProvider.cartCount}', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                    backgroundColor: _primary,
+                    smallSize: 16,
+                    child: const Icon(Icons.shopping_cart_outlined, color: _primary, size: 22),
+                  ),
                 ),
               ],
             ),
