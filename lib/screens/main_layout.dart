@@ -30,6 +30,15 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     final appProvider = Provider.of<AppProvider>(context);
 
+    // Sync provider-driven navigation changes (e.g. from "Continue Shopping")
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (appProvider.currentIndex != _currentIndex) {
+        setState(() {
+          _currentIndex = appProvider.currentIndex;
+        });
+      }
+    });
+
     return Scaffold(
       // IndexedStack keeps the state of screens alive
       body: IndexedStack(
@@ -43,6 +52,7 @@ class _MainLayoutState extends State<MainLayout> {
           setState(() {
             _currentIndex = index;
           });
+          appProvider.changeIndex(index);
         },
         selectedItemColor: _primary,
         unselectedItemColor: Colors.grey,

@@ -136,7 +136,10 @@ class WishlistScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              final appProvider = Provider.of<AppProvider>(context, listen: false);
+              appProvider.changeIndex(0);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: _primary,
               foregroundColor: Colors.white,

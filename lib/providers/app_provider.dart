@@ -7,12 +7,21 @@ class AppProvider with ChangeNotifier {
   // Wishlist: Product IDs or Product Maps
   final Map<int, Map<String, dynamic>> _wishlistItems = {};
 
+  // Navigation State
+  int _currentIndex = 0;
+
   // GETTERS
+  int get currentIndex => _currentIndex;
   Map<int, Map<String, dynamic>> get cartItems => _cartItems;
   Map<int, Map<String, dynamic>> get wishlistItems => _wishlistItems;
 
   int get cartCount => _cartItems.values.fold(0, (sum, item) => sum + (item['quantity'] as int));
   int get wishlistCount => _wishlistItems.length;
+
+  void changeIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
 
   double get cartTotal {
     double total = 0.0;
