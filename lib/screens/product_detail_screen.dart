@@ -1,5 +1,5 @@
+// lib/screens/product_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 
@@ -29,17 +29,9 @@ class ProductDetailScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.orange.shade700 : Colors.white),
+            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.orange : Colors.white),
             onPressed: () {
               appProvider.toggleWishlist(product);
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(!isFavorite ? 'Added to Wishlist' : 'Removed from Wishlist'),
-                  backgroundColor: _primary,
-                  duration: const Duration(seconds: 1),
-                ),
-              );
             },
           )
         ],
@@ -48,48 +40,69 @@ class ProductDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Product image
             SizedBox(
               width: double.infinity,
               height: 300,
-              child: CachedNetworkImage(
-                imageUrl: image,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-                errorWidget: (_, __, ___) => Container(color: Colors.grey[200], child: const Icon(Icons.image_not_supported, size: 50)),
-              ),
+              child: image.isNotEmpty
+                  ? Image.network(image, fit: BoxFit.cover)
+                  : const Icon(Icons.image_not_supported, size: 100),
             ),
+            
+            // Product details
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Category badge
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(color: _primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-                    child: Text(cat.toUpperCase(), style: const TextStyle(color: _primary, fontWeight: FontWeight.bold, fontSize: 12)),
+                    decoration: BoxDecoration(
+                      color: _primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(cat.toUpperCase(), style: const TextStyle(color: _primary, fontWeight: FontWeight.bold)),
                   ),
+                  
                   const SizedBox(height: 16),
-                  Text(name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-                  const SizedBox(height: 10),
-                  Text(price, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: _primary)),
+                  
+                  // Product name
+                  Text(name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Price
+                  Text(price, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: _primary)),
+                  
                   const SizedBox(height: 20),
-                  const Divider(thickness: 1, color: Colors.grey),
-                  const SizedBox(height: 20),
+                  
+                  // Description
                   const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Text(desc, style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black54)),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 8),
+                  Text(desc, style: const TextStyle(fontSize: 16, height: 1.5)),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Stock status
                   Row(
                     children: [
                       Icon(Icons.inventory_2, color: inStock ? _primary : Colors.red),
                       const SizedBox(width: 8),
                       Text(
                         inStock ? 'In Stock' : 'Out of Stock',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: inStock ? _primary : Colors.red),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: inStock ? _primary : Colors.red,
+                        ),
                       ),
                     ],
                   ),
+                  
                   const SizedBox(height: 40),
+                  
+                  // Add to cart button
                   SizedBox(
                     width: double.infinity,
                     height: 60,
@@ -98,23 +111,25 @@ class ProductDetailScreen extends StatelessWidget {
                         appProvider.addToCart(product);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Added to Cart successfully!', style: TextStyle(color: Colors.white)), 
+                            content: Text('Added to Cart successfully!'),
                             backgroundColor: _primary,
                           ),
                         );
                       } : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _primary, 
+                        backgroundColor: _primary,
                         foregroundColor: Colors.white,
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text(
-                        'ADD TO CART', 
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                        'ADD TO CART',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1),
                       ),
                     ),
                   ),
+                  
                   const SizedBox(height: 20),
                 ],
               ),

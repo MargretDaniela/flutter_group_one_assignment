@@ -1,26 +1,30 @@
+// lib/screens/cart_screen.dart
+// Shopping cart with item management and order summary
+// Features responsive design and intuitive controls
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/app_provider.dart';
 
+// Consistent color scheme
 const _primary = Color(0xFF2E7D32);
 const _bg = Color(0xFFF1F8E9);
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
+  // Format currency based on first item's format
   String getFormattedTotal(AppProvider appProvider) {
     if (appProvider.cartItems.isEmpty) return 'UGX 0';
     final firstItem = appProvider.cartItems.values.first['product'];
     final fPrice = firstItem['formatted_price']?.toString() ?? '';
     
-    // Extract non-digit prefix (e.g. "UGX " or "$")
     final match = RegExp(r'^[^0-9]*').firstMatch(fPrice);
     final prefix = match != null ? match.group(0) : '';
     
     final totalValue = appProvider.cartTotal;
     
-    // Check if the original price contains a comma or has no decimals (like UGX)
     if (fPrice.contains(',')) {
       final RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
       final formattedValue = totalValue.toStringAsFixed(0).replaceAllMapped(reg, (Match m) => '${m[1]},');
@@ -47,13 +51,13 @@ class CartScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: cartItems.isEmpty
-          ? _buildEmptyCart()
+          ? _buildEmptyCart(context)
           : SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Cart item count header
+                  // Cart summary header
                   Container(
                     width: double.infinity,
                     color: _primary.withValues(alpha: 0.08),
@@ -94,7 +98,7 @@ class CartScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  // Detailed Order Summary card in the scrollable body
+                  // Order summary card
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: _buildDetailedSummary(appProvider),
@@ -102,11 +106,13 @@ class CartScreen extends StatelessWidget {
                 ],
               ),
             ),
+      // Checkout bar
       bottomNavigationBar: cartItems.isEmpty ? null : _buildStickyBottomBar(appProvider),
     );
   }
 
-  Widget _buildEmptyCart() {
+  // Empty cart state
+  Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -122,11 +128,30 @@ class CartScreen extends StatelessWidget {
             'Add items to get started',
             style: TextStyle(fontSize: 14, color: Colors.black38),
           ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primary,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text(
+              'Continue Shopping',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
+  // Order summary card
   Widget _buildDetailedSummary(AppProvider appProvider) {
     final formattedTotal = getFormattedTotal(appProvider);
     return Container(
@@ -201,6 +226,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
+  // Sticky checkout bar
   Widget _buildStickyBottomBar(AppProvider appProvider) {
     final formattedTotal = getFormattedTotal(appProvider);
     return Container(
@@ -269,6 +295,7 @@ class CartScreen extends StatelessWidget {
   }
 }
 
+// Cart item card component
 class _CartItemCard extends StatelessWidget {
   final String image;
   final String name;
@@ -303,16 +330,16 @@ class _CartItemCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product image
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                width: 72,
-                height: 72,
+                width: 80,
+                height: 80,
                 color: Colors.grey[100],
                 child: CachedNetworkImage(
                   imageUrl: image,
@@ -340,7 +367,7 @@ class _CartItemCard extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     price,
                     style: const TextStyle(
@@ -349,55 +376,48 @@ class _CartItemCard extends StatelessWidget {
                       fontSize: 15,
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  // Quantity controls
+                  Container(
+                    decoration: BoxDecoration(
+                      color: _bg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _primary.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _StepperButton(icon: Icons.remove, onTap: onDecrement),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            '$quantity',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: _primary,
+                            ),
+                          ),
+                        ),
+                        _StepperButton(icon: Icons.add, onTap: onIncrement),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            // Controls column
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Delete button
-                GestureDetector(
-                  onTap: onRemove,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(Icons.delete_outline, color: Colors.red.shade400, size: 18),
-                  ),
+            // Remove button
+            GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 10),
-                // Quantity stepper
-                Container(
-                  decoration: BoxDecoration(
-                    color: _bg,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _primary.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _StepperButton(icon: Icons.remove, onTap: onDecrement),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          '$quantity',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: _primary,
-                          ),
-                        ),
-                      ),
-                      _StepperButton(icon: Icons.add, onTap: onIncrement),
-                    ],
-                  ),
-                ),
-              ],
+                child: Icon(Icons.delete_outline, color: Colors.red.shade400, size: 20),
+              ),
             ),
           ],
         ),
@@ -406,6 +426,7 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
+// Quantity stepper button component
 class _StepperButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -417,14 +438,14 @@ class _StepperButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 28,
-        height: 28,
+        width: 32,
+        height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: _primary,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Icon(icon, size: 14, color: Colors.white),
+        child: Icon(icon, size: 16, color: Colors.white),
       ),
     );
   }
