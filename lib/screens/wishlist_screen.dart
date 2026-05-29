@@ -22,7 +22,7 @@ class WishlistScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: wishlistItems.isEmpty
-          ? const Center(child: Text("Your wishlist is empty", style: TextStyle(fontSize: 18, color: Colors.black54)))
+          ? _buildEmptyWishlist(context)
           : GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -115,6 +115,42 @@ class WishlistScreen extends StatelessWidget {
                 );
               },
             ),
+    );
+  }
+
+  Widget _buildEmptyWishlist(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.favorite_border_outlined, size: 80, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          const Text(
+            'Your wishlist is empty',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Save your favorite items here',
+            style: TextStyle(fontSize: 14, color: Colors.black38),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              elevation: 2,
+            ),
+            child: const Text(
+              'EXPLORE PRODUCTS',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
